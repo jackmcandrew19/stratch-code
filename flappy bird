@@ -1,0 +1,85 @@
+import time
+import keyboard
+
+WIDTH = 40
+HEIGHT = 15
+
+bird_x = 5
+bird_y = HEIGHT // 2
+velocity = 0
+gravity = 1
+
+score = 0
+
+pipe_gap = 4
+pipe_x = WIDTH - 1
+pipe_height = HEIGHT // 2
+
+game_over = False
+
+def display():
+    global bird_x, bird_y, pipe_x, pipe_height, score, game_over
+    
+    # Clear the screen
+    print("\033c", end="")
+    
+    # Draw the top boundary
+    print("-" * WIDTH)
+    
+    # Draw the game area
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            if (x == bird_x and y == bird_y):
+                print("B", end="")
+            elif (x == pipe_x and y < pipe_height) or (x == pipe_x and y > pipe_height + pipe_gap):
+                print("|", end="")
+            else:
+                print(" ", end="")
+        print()
+    
+    # Draw the bottom boundary
+    print("-" * WIDTH)
+    
+    # Display the score
+    print("Score:", score)
+    
+    # Display game over message
+    if game_over:
+        print("Game Over!")
+    
+    time.sleep(0.1)
+
+def update():
+    global bird_x, bird_y, velocity, pipe_x, pipe_height, score, game_over
+    
+    bird_y += velocity
+    velocity += gravity
+    
+    # Check for collision with boundaries or pipes
+    if bird_y <= 0 or bird_y >= HEIGHT or (bird_x == pipe_x and (bird_y <= pipe_height or bird_y >= pipe_height + pipe_gap)):
+        game_over = True
+    
+    # Increment score if the bird passed the pipe
+    if bird_x == pipe_x + 1:
+        score += 1
+    
+    # Move the pipe
+    pipe_x -= 1
+    
+    # Reset the pipe and randomize its height if it's off-screen
+    if pipe_x <= 0:
+        pipe_x = WIDTH - 1
+        pipe_height = random.randint(1, HEIGHT - pipe_gap - 2)
+
+def flap():
+    global velocity
+    velocity = -2
+
+# Main game loop
+while not game_over:
+    display()
+    update()
+    
+    # Check for key press
+    if keyboard.is_pressed("space"):
+        flap()
